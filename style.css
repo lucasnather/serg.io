@@ -1,30 +1,58 @@
-* {
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-}
-
 body {
-    height: 100vh;
+    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgb(32, 31, 31);
-    font-family: Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    background: #2c3e50;
+    font-family: Arial, sans-serif;
 }
 
-.container {
-    width: 300px;
-    height: 300px;
-    border-radius: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    background-color: #fff;
-    cursor: pointer;
+#game-container {
+    background-image: url(./assets/fundo-jogo-sergio.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+    width: 400px;
+    height: 600px;
+    overflow: hidden;
 }
 
-h1 {
-    font-size: 27px;
+#bird {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-image: url(./assets/serg.io.png);
+    left: 50px;
+    top: 50%;
+    border-radius: 50%;
+}
+
+.pipe {
+    position: absolute;
+    width: 60px;
+    background: #2ecc71;
+}
+
+.pip + .pipe {
+    margin-right: 20px;
+}
+
+#score {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    font-size: 24px;
+    z-index: 100;
+}
+
+#motivation {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    color: white;
+    font-size: 18px;
+    z-index: 100;
+    display: none; /* Inicialmente oculto */
 }
