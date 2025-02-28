@@ -3,19 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
     <title>Flappy Bird Ajustado</title>
     <style>
-      
+      body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #2c3e50;
+    font-family: Arial, sans-serif;
+}
+
+#game-container {
+    background-image: url(./assets/fundo-jogo-sergio.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+    width: 400px;
+    height: 600px;
+    overflow: hidden;
+}
+
+#bird {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-image: url(./assets/serg.io.png);
+    left: 50px;
+    top: 50%;
+    border-radius: 50%;
+}
+
+.pipe {
+    position: absolute;
+    width: 60px;
+    background-image: url(./assets/pipe-jogo-sergio.png);
+    background-size: cover;
+}
+
+.pipe + .pipe {
+    margin-right: 20px;
+}
+
+.audio {
+    display: none;
+}
+
+#score {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    font-size: 24px;
+    z-index: 100;
+}
+
+#motivation {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    color: white;
+    font-size: 18px;
+    z-index: 100;
+    display: none; /* Inicialmente oculto */
+}
     </style>
 </head>
 <body>
+    <audio controls preload="auto" loop class="audio" id="audio">
+        <source src="./audio/Mega Man 2 - Dr. Wily's Castle.mp3" type="audio/mpeg">
+        Seu navegador não suporta áudio HTML5.
+    </audio>
     <div id="game-container">
         <div id="score">0</div>
         <div id="motivation">SIM SIM CARA VOCÊ CONSEGUE</div>
         <img src="./assets/serg.io.png" alt="" id="bird">
     </div>
 
-    <script src="./script.js"></script>
+    <script>
+        // Variáveis do jogo
+        const bird = document.getElementById('bird');
+        const audio = document.getElementById('audio');
+        const gameContainer = document.getElementById('game-container');
+        const motivation = document.getElementById('motivation');
+        let birdY = 300;
+        let velocity = 0;
+        let gravity = 0.8; // Gravidade aumentada
+        let score = 0;
+        let gameLoop;
+        let pipeCreationLoop;
+
+        gameContainer.addEventListener('click', () => {
+            audio.play()
+        })
+
+// Função de pulo
+function jump() {
+    velocity = -12; // Força do pulo ajustada
+}
+
+// Atualiza a posição do pássaro
+function updateBird() {
+    velocity += gravity;
+    birdY += velocity;
+    bird.style.top = `${birdY}px`;
+
+    // Verifica colisão com chão/teto
+    if (birdY < 0 || birdY > gameContainer.offsetHeight - bird.offsetHeight) {
+        endGame();
+    }
+}
+
+// Cria um par de canos
+function createPipe() {
+    const gap = 200; // Aumentei a separação entre os canos
+    const pipeHeight = Math.random() * (gameContainer.offsetHeight - gap - 100) + 50;
+
+    // Cano de cima
+    const topPipe = document.createElement('div');
+    topPipe.className = 'pipe';
+    topPipe.style.height = `${pipeHeight}px`;
+    topPipe.style.top = '0';
+    topPipe.style.left = '400px';
+
+    // Cano de baixo
+    const bottomPipe = document.createElement('div');
+    bottomPipe.className = 'pipe';
+    bottomPipe.style.height = `${gameContainer.offsetHeight - pipeHeight - gap}px`;
+    bottomPipe.style.bottom = '0';
+    bottomPipe.style.left = '400px';
+
+    gameContainer.appendChild(topPipe);
+    gameContainer.appendChild(bottomPipe);
+
+    // Movimento dos canos
+    let pipeX = 400;
+    const pipeMoveInterval = setInterval(() => {
+        pipeX -= 2;
+        topPipe.style.left = `${pipeX}px`;
+        bottomPipe.style.left = `${pipeX}px`;
+
+        // Verifica colisão
+        if (checkCollision(topPipe, bottomPipe)) {
+            endGame();
+        }
+
+        // Atualiza pontuação
+        if (pipeX === 50) {
+            score += 1;
+            document.getElementById('score').textContent = score;
+
+            // Mostra a mensagem a cada 10 pontos
+            if (score % 1 === 0 && score <= 200) {
+                motivation.style.display = 'block';
+                setTimeout(() => {
+                    motivation.style.display = 'none';
+                }, 2000); // Esconde a mensagem após 2 segundos
+            }
+
+            // Fim do jogo ao atingir 200 pontos
+            if (score === 200) {
+                endGame();
+                alert("Parabéns! Você venceu!");
+            }
+        }
+
+        // Remove canos fora da tela
+        if (pipeX < -60) {
+            clearInterval(pipeMoveInterval);
+            gameContainer.removeChild(topPipe);
+            gameContainer.removeChild(bottomPipe);
+        }
+    }, 20);
+}
+
+// Verifica colisão
+function checkCollision(topPipe, bottomPipe) {
+    const birdRect = bird.getBoundingClientRect();
+    const topPipeRect = topPipe.getBoundingClientRect();
+    const bottomPipeRect = bottomPipe.getBoundingClientRect();
+
+    return (
+        birdRect.right > topPipeRect.left &&
+        birdRect.left < topPipeRect.right &&
+        (birdRect.top < topPipeRect.bottom || birdRect.bottom > bottomPipeRect.top)
+    );
+}
+
+// Finaliza o jogo
+function endGame() {
+    clearInterval(gameLoop);
+    clearInterval(pipeCreationLoop);
+    alert(`Game Over! Pontuação: ${score}`);
+    window.location.reload();
+}
+
+// Event listeners
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') jump();
+});
+document.addEventListener('click', jump);
+
+// Inicia o jogo
+gameLoop = setInterval(updateBird, 20);
+pipeCreationLoop = setInterval(createPipe, 1500);
+    </script>
 </body>
 </html>

@@ -31,10 +31,11 @@ body {
 .pipe {
     position: absolute;
     width: 60px;
-    background: #2ecc71;
+    background-image: url(./assets/pipe-jogo-sergio.png);
+    background-size: cover;
 }
 
-.pip + .pipe {
+.pipe + .pipe {
     margin-right: 20px;
 }
 
